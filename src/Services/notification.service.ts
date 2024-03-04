@@ -3,7 +3,7 @@ import { socketIOOrderObject } from "../server";
 import {
   IEnrolmentDocument,
   IEnrolmentNotifcation,
-} from "@remus1504/micrograde";
+} from "@remus1504/micrograde-shared";
 import { getEnrolmentByEnrolmentId } from "../Services/enrolment.service";
 
 const createNotification = async (
@@ -38,7 +38,7 @@ const markNotificationAsRead = async (
   const order: IEnrolmentDocument = await getEnrolmentByEnrolmentId(
     notification.orderId
   );
-  socketIOOrderObject.emit("order notification", order, notification);
+  socketIOOrderObject.emit("Enrolment notification", order, notification);
   return notification;
 };
 
@@ -56,9 +56,8 @@ const sendNotification = async (
     message,
     orderId: data.orderId,
   } as IEnrolmentNotifcation;
-  const orderNotification: IEnrolmentNotifcation = await createNotification(
-    notification
-  );
+  const orderNotification: IEnrolmentNotifcation =
+    await createNotification(notification);
   socketIOOrderObject.emit("order notification", data, orderNotification);
 };
 

@@ -1,9 +1,9 @@
-import { IEnrolmentDocument } from "@remus1504/micrograde";
+import { IEnrolmentDocument } from "@remus1504/micrograde-shared";
 import { StatusCodes } from "http-status-codes";
 import { Request, Response } from "express";
 import {
-  getOrdersByStudentId,
-  getOrdersByInstructorId,
+  getEnrolmentsByStudentId,
+  getEnrolmentsByInstructorId,
   getEnrolmentByEnrolmentId,
 } from "../../Services/enrolment.service";
 
@@ -15,19 +15,18 @@ const enrolmentId = async (req: Request, res: Response): Promise<void> => {
 };
 
 const instructorOrders = async (req: Request, res: Response): Promise<void> => {
-  const enrolmentOrders: IEnrolmentDocument[] = await getOrdersByInstructorId(
-    req.params.instructorId
-  );
+  const enrolmentOrders: IEnrolmentDocument[] =
+    await getEnrolmentsByInstructorId(req.params.instructorId);
   res
     .status(StatusCodes.OK)
     .json({ message: "Instructor orders", enrolmentOrders });
 };
 
 const studentOrders = async (req: Request, res: Response): Promise<void> => {
-  const orders: IEnrolmentDocument[] = await getOrdersByStudentId(
+  const orders: IEnrolmentDocument[] = await getEnrolmentsByStudentId(
     req.params.studentId
   );
-  res.status(StatusCodes.OK).json({ message: "Student orders", orders });
+  res.status(StatusCodes.OK).json({ message: "Student Enrolments", orders });
 };
 
 export { enrolmentId, instructorOrders, studentOrders };

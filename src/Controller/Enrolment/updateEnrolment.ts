@@ -5,12 +5,12 @@ import { Request, Response } from "express";
 import { config } from "../../configuration";
 import { StatusCodes } from "http-status-codes";
 import {
-  approveDeliveryDate,
+  approveEnrolmentDate,
   approveEnrolment,
-  cancelOrder,
-  rejectEnrolementStartDate,
-  requestDeliveryExtension,
-  instrcutorAcceptEnrolmentOrder,
+  cancelEnrolment,
+  rejectExtensionDate,
+  requestEnrolmentExtension,
+  instructorDeliveredEnrolment,
 } from "../../Services/enrolment.service";
 import { enrolmentUpdateSchema } from "../../Schema/enrolment";
 import {
@@ -18,7 +18,7 @@ import {
   IDeliveredWork,
   IEnrolmentDocument,
   uploads,
-} from "@remus1504/micrograde";
+} from "@remus1504/micrograde-shared";
 import { UploadApiResponse } from "cloudinary";
 
 const stripe: Stripe = new Stripe(config.STRIPE_API_KEY!, {
@@ -30,7 +30,7 @@ const cancel = async (req: Request, res: Response): Promise<void> => {
     payment_intent: `${req.body.paymentIntent}`,
   });
   const { enrolmentOrderId } = req.params;
-  await cancelOrder(enrolmentOrderId, req.body.orderData);
+  await cancelEnrolment(enrolmentOrderId, req.body.orderData);
   res
     .status(StatusCodes.OK)
     .json({ message: "Enrolment cancelled successfully." });
@@ -47,13 +47,11 @@ const requestExtension = async (req: Request, res: Response): Promise<void> => {
     );
   }
   const { enrolmentOrderId } = req.params;
-  const order: IEnrolmentDocument = await requestDeliveryExtension(
+  const order: IEnrolmentDocument = await requestEnrolmentExtension(
     enrolmentOrderId,
     req.body
   );
-  res
-    .status(StatusCodes.OK)
-    .json({ message: "Enrolment delivery request", order });
+  res.status(StatusCodes.OK).json({ message: "Enrolment request", order });
 };
 
 const deliveryDate = async (req: Request, res: Response): Promise<void> => {
@@ -69,14 +67,14 @@ const deliveryDate = async (req: Request, res: Response): Promise<void> => {
   const { enrolmentOrderId, type } = req.params;
   const order: IEnrolmentDocument =
     type === "approve"
-      ? await approveDeliveryDate(enrolmentOrderId, req.body)
-      : await rejectEnrolementStartDate(enrolmentOrderId);
+      ? await approveEnrolmentDate(enrolmentOrderId, req.body)
+      : await rejectExtensionDate(enrolmentOrderId);
   res
     .status(StatusCodes.OK)
-    .json({ message: "Enrolment delivery date extension", order });
+    .json({ message: "Enrolment date extension", order });
 };
 
-const studentApproveOrder = async (
+const studentApproveEnrolment = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -90,7 +88,7 @@ const studentApproveOrder = async (
     .json({ message: "Enrolment approved successfully.", order });
 };
 
-const deliverOrder = async (req: Request, res: Response): Promise<void> => {
+const deliverEnrolment = async (req: Request, res: Response): Promise<void> => {
   const { enrolmentOrderId } = req.params;
   let file: string = req.body.file;
   const randomBytes: Buffer = await Promise.resolve(crypto.randomBytes(20));
@@ -105,7 +103,7 @@ const deliverOrder = async (req: Request, res: Response): Promise<void> => {
     if (!result.public_id) {
       throw new BadRequestError(
         "File upload error. Try again",
-        "Update deliverOrder() method"
+        "Update deliverEnrolment() method"
       );
     }
     file = result?.secure_url;
@@ -117,7 +115,7 @@ const deliverOrder = async (req: Request, res: Response): Promise<void> => {
     fileName: req.body.fileName,
     fileSize: req.body.fileSize,
   };
-  const order: IEnrolmentDocument = await instrcutorAcceptEnrolmentOrder(
+  const order: IEnrolmentDocument = await instructorDeliveredEnrolment(
     enrolmentOrderId,
     true,
     deliveredWork
@@ -131,6 +129,6 @@ export {
   cancel,
   requestExtension,
   deliveryDate,
-  studentApproveOrder,
-  deliverOrder,
+  studentApproveEnrolment,
+  deliverEnrolment,
 };

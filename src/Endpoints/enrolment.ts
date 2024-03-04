@@ -6,9 +6,9 @@ import {
   instructorOrders,
 } from "../Controller/Enrolment/getEnrolment";
 import {
-  studentApproveOrder,
+  studentApproveEnrolment,
   cancel,
-  deliverOrder,
+  deliverEnrolment,
   deliveryDate,
   requestExtension,
 } from "../Controller/Enrolment/updateEnrolment";
@@ -17,21 +17,21 @@ import express, { Router } from "express";
 
 const router: Router = express.Router();
 
-const orderRoutes = (): Router => {
+const enrolmentRoutes = (): Router => {
   router.get("/notification/:userTo", notifications);
-  router.get("/:e", enrolmentId);
+  router.get("/:enrolmentId", enrolmentId);
   router.get("/instructor/:instructorId", instructorOrders);
   router.get("/student/:studentId", studentOrders);
   router.post("/", order);
   router.post("/create-payment-intent", intent);
-  router.put("/cancel/:e", cancel);
-  router.put("/extension/:e", requestExtension);
-  router.put("/deliver-order/:e", deliverOrder);
-  router.put("/approve-enrolment/:enrolmentId", studentApproveOrder);
-  router.put("/course/:type/:e", deliveryDate);
+  router.put("/cancel/:enrolmentId", cancel);
+  router.put("/extension/:enrolmentId", requestExtension);
+  router.put("/deliver-enrolment/:enrolmentId", deliverEnrolment);
+  router.put("/approve-enrolment/:enrolmentId", studentApproveEnrolment);
+  router.put("/course/:type/:enrolmentId", deliveryDate);
   router.put("/notification/mark-as-read", markNotificationAsRead);
 
   return router;
 };
 
-export { orderRoutes };
+export { enrolmentRoutes };

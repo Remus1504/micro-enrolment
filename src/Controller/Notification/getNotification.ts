@@ -1,5 +1,5 @@
 import { getNotificationsById } from "../../Services/notification.service";
-import { IEnrolmentNotifcation } from "@remus1504/micrograde";
+import { IEnrolmentNotifcation } from "@remus1504/micrograde-shared";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 

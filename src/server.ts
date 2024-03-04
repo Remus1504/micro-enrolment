@@ -6,7 +6,7 @@ import {
   IAuthPayload,
   IErrorResponse,
   winstonLogger,
-} from "@remus1504/micrograde";
+} from "@remus1504/micrograde-shared";
 import { Logger } from "winston";
 import { config } from "./configuration";
 import {
@@ -24,10 +24,10 @@ import { verify } from "jsonwebtoken";
 import compression from "compression";
 import { checkConnection } from "./elasticsearch";
 import { appRoutes } from "./endpoints";
-import { createConnection } from "../Queues/connection";
+import { createConnection } from "./Queues/connection";
 import { Channel } from "amqplib";
 import { Server } from "socket.io";
-import { consumerReviewFanoutMessages } from "../Queues/enrolment.consumer";
+import { consumerReviewFanoutMessages } from "./Queues/enrolment.consumer";
 
 const SERVER_PORT = 4006;
 const log: Logger = winstonLogger(

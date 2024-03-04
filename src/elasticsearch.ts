@@ -1,14 +1,14 @@
-import { Client } from '@elastic/elasticsearch';
-import { ClusterHealthResponse } from '@elastic/elasticsearch/lib/api/types';
-import { config } from './configuration';
-import { winstonLogger } from '@remus1504/micrograde';
+import { Client } from "@elastic/elasticsearch";
+import { ClusterHealthResponse } from "@elastic/elasticsearch/lib/api/types";
+import { config } from "./configuration";
+import { winstonLogger } from "@remus1504/micrograde-shared";
 
-import { Logger } from 'winston';
+import { Logger } from "winston";
 
 const log: Logger = winstonLogger(
   `${config.ELASTIC_SEARCH_ENDPOINT}`,
-  'UserElasticSearchServer',
-  'debug',
+  "EnrolmentElasticSearchServer",
+  "debug"
 );
 
 const elasticSearchClient = new Client({
@@ -21,11 +21,13 @@ const checkConnection = async (): Promise<void> => {
     try {
       const healthOfConnection: ClusterHealthResponse =
         await elasticSearchClient.cluster.health({});
-      log.info(`User Elasticsearch health  - ${healthOfConnection.status}`);
+      log.info(
+        `Enrolment Elasticsearch health  - ${healthOfConnection.status}`
+      );
       Connected = true;
     } catch (error) {
-      log.error('Connection to Elasticsearch failed.');
-      log.log('error', 'UserService Connection() method:', error);
+      log.error("Connection to Elasticsearch failed.");
+      log.log("error", "EnrolmentService Connection() method:", error);
     }
   }
 };

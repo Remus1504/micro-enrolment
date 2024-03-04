@@ -1,4 +1,4 @@
-import { IEnrolmentNotifcation } from "@remus1504/micrograde";
+import { IEnrolmentNotifcation } from "@remus1504/micrograde-shared";
 import { model, Model, Schema } from "mongoose";
 
 const notificationSchema: Schema = new Schema({

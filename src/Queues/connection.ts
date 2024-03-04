@@ -1,11 +1,11 @@
-import { config } from "../src/configuration";
-import { winstonLogger } from "@remus1504/micrograde";
+import { config } from "../configuration";
+import { winstonLogger } from "@remus1504/micrograde-shared";
 import client, { Channel, Connection } from "amqplib";
 import { Logger } from "winston";
 
 const log: Logger = winstonLogger(
   `${config.ELASTIC_SEARCH_ENDPOINT}`,
-  "orderQueueConnection",
+  "enrolmentQueueConnection",
   "debug"
 );
 
@@ -15,11 +15,15 @@ async function createConnection(): Promise<Channel | undefined> {
       `${config.RABBITMQ_ENDPOINT}`
     );
     const channel: Channel = await connection.createChannel();
-    log.info("Order server connected to queue successfully...");
+    log.info("Enrolment server connected to queue successfully...");
     closeConnection(channel, connection);
     return channel;
   } catch (error) {
-    log.log("error", "OrderService createConnection() method error:", error);
+    log.log(
+      "error",
+      "EnrolmentService createConnection() method error:",
+      error
+    );
     return undefined;
   }
 }

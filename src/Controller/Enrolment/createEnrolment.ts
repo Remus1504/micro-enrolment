@@ -3,8 +3,11 @@ import { Request, Response } from "express";
 import { config } from "../../configuration";
 import { StatusCodes } from "http-status-codes";
 import { enrolmentSchema } from "../../Schema/enrolment";
-import { BadRequestError, IEnrolmentDocument } from "@remus1504/micrograde";
-import { createEnrolmentOrder } from "../../Services/enrolment.service";
+import {
+  BadRequestError,
+  IEnrolmentDocument,
+} from "@remus1504/micrograde-shared";
+import { createEnrolment } from "../../Services/enrolment.service";
 
 const stripe: Stripe = new Stripe(config.STRIPE_API_KEY!, {
   typescript: true,
@@ -21,7 +24,7 @@ const intent = async (req: Request, res: Response): Promise<void> => {
       await stripe.customers.create({
         email: `${req.currentUser!.email}`,
         metadata: {
-          buyerId: `${req.body.buyerId}`,
+          studentId: `${req.body.studentId}`,
         },
       });
     customerId = createdCustomer.id;
@@ -65,10 +68,10 @@ const order = async (req: Request, res: Response): Promise<void> => {
       : (5.5 / 100) * req.body.price;
   let orderData: IEnrolmentDocument = req.body;
   orderData = { ...orderData, serviceFee };
-  const order: IEnrolmentDocument = await createEnrolmentOrder(orderData);
+  const offer: IEnrolmentDocument = await createEnrolment(orderData);
   res
     .status(StatusCodes.CREATED)
-    .json({ message: "enrolment created successfully.", order });
+    .json({ message: "enrolment created successfully.", offer });
 };
 
 export { intent, order };

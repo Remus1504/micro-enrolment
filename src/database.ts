@@ -1,4 +1,4 @@
-import { winstonLogger } from "@remus1504/micrograde";
+import { winstonLogger } from "@remus1504/micrograde-shared";
 import { Logger } from "winston";
 import { config } from "./configuration";
 import mongoose from "mongoose";
@@ -12,9 +12,13 @@ const log: Logger = winstonLogger(
 const databaseConnection = async (): Promise<void> => {
   try {
     await mongoose.connect(`${config.MONGO_DB_CONNCECTION_URL}`);
-    log.info("Course service successfully connected to database.");
+    log.info("Enrolment service successfully connected to database.");
   } catch (error) {
-    log.log("error", "UsersService databaseConnection() method error:", error);
+    log.log(
+      "error",
+      "EnrolmentService databaseConnection() method error:",
+      error
+    );
   }
 };
 

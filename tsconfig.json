@@ -22,10 +22,10 @@
     "resolveJsonModule": true,
     "plugins": [
       { "transform": "typescript-transform-paths" },
-      { "transform": "typescript-transform-paths", "afterDeclarations": true },
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
     ],
     "paths": {
-      "@users/*": ["src/*"],
-    },
-  },
+      "@enrolments/*": ["src/*"]
+    }
+  }
 }

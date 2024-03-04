@@ -1,4 +1,4 @@
-import { IEnrolmentDocument } from "@remus1504/micrograde";
+import { IEnrolmentDocument } from "@remus1504/micrograde-shared";
 import { model, Model, Schema } from "mongoose";
 
 const enrolmentSchema: Schema = new Schema(
@@ -8,8 +8,8 @@ const enrolmentSchema: Schema = new Schema(
       price: { type: Number, required: true },
       description: { type: String, required: true },
       durationInDays: { type: Number, required: true },
-      oldDeliveryDate: { type: Date },
-      newDeliveryDate: { type: Date },
+      oldStartDate: { type: Date },
+      newStartDate: { type: Date },
       accepted: { type: Boolean, required: true },
       cancelled: { type: Boolean, required: true },
       reason: { type: String, default: "" },
@@ -34,7 +34,7 @@ const enrolmentSchema: Schema = new Schema(
     serviceFee: { type: Number, default: 0 },
     requirements: { type: String, default: "" },
     approvedEnrolment: { type: Boolean, default: false },
-    delivered: { type: Boolean, default: false },
+    enrolled: { type: Boolean, default: false },
     cancelled: { type: Boolean, default: false },
     approvedAt: { type: Date },
     paymentIntent: { type: String },
@@ -57,9 +57,9 @@ const enrolmentSchema: Schema = new Schema(
     events: {
       placeEnrolment: { type: Date },
       requirements: { type: Date },
-      orderStarted: { type: Date },
-      deliveryDateUpdate: { type: Date },
-      orderDelivered: { type: Date },
+      enrolmentStarted: { type: Date },
+      startDateUpdate: { type: Date },
+      enrolmentSuccessful: { type: Date },
       studentReview: { type: Date },
       instructorReview: { type: Date },
     },
