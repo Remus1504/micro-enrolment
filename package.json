@@ -20,7 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@elastic/elasticsearch": "^8.10.0",
-    "@remus1504/micrograde-shared": "^0.0.4",
+    "@remus1504/micrograde-shared": "^0.0.6",
     "amqplib": "^0.10.3",
     "cloudinary": "^1.41.3",
     "compression": "^1.7.4",

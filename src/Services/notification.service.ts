@@ -1,10 +1,10 @@
-import { OrderNotificationModel } from "../Modals/notificationSchema";
-import { socketIOOrderObject } from "../server";
+import { OrderNotificationModel } from '../Modals/notificationSchema';
+import { socketIOOrderObject } from '../server';
 import {
   IEnrolmentDocument,
   IEnrolmentNotifcation,
-} from "@remus1504/micrograde-shared";
-import { getEnrolmentByEnrolmentId } from "../Services/enrolment.service";
+} from '@remus1504/micrograde-shared';
+import { getEnrolmentByEnrolmentId } from '../Services/enrolment.service';
 
 const createNotification = async (
   data: IEnrolmentNotifcation
@@ -36,9 +36,9 @@ const markNotificationAsRead = async (
       { new: true }
     )) as IEnrolmentNotifcation;
   const order: IEnrolmentDocument = await getEnrolmentByEnrolmentId(
-    notification.orderId
+    notification.enrolmentId
   );
-  socketIOOrderObject.emit("Enrolment notification", order, notification);
+  socketIOOrderObject.emit('Enrolment notification', order, notification);
   return notification;
 };
 
@@ -54,11 +54,11 @@ const sendNotification = async (
     receiverUsername: data.studentUsername,
     receiverPicture: data.studentImage,
     message,
-    orderId: data.orderId,
+    enrolmentId: data.enrolmentId,
   } as IEnrolmentNotifcation;
   const orderNotification: IEnrolmentNotifcation =
     await createNotification(notification);
-  socketIOOrderObject.emit("order notification", data, orderNotification);
+  socketIOOrderObject.emit('enrolment notification', data, orderNotification);
 };
 
 export {

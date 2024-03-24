@@ -1,13 +1,13 @@
-import Stripe from "stripe";
-import { Request, Response } from "express";
-import { config } from "../../configuration";
-import { StatusCodes } from "http-status-codes";
-import { enrolmentSchema } from "../../Schema/enrolment";
+import Stripe from 'stripe';
+import { Request, Response } from 'express';
+import { config } from '../../configuration';
+import { StatusCodes } from 'http-status-codes';
+import { enrolmentSchema } from '../../Schema/enrolment';
 import {
   BadRequestError,
   IEnrolmentDocument,
-} from "@remus1504/micrograde-shared";
-import { createEnrolment } from "../../Services/enrolment.service";
+} from '@remus1504/micrograde-shared';
+import { createEnrolment } from '../../Services/enrolment.service';
 
 const stripe: Stripe = new Stripe(config.STRIPE_API_KEY!, {
   typescript: true,
@@ -18,7 +18,7 @@ const intent = async (req: Request, res: Response): Promise<void> => {
     await stripe.customers.search({
       query: `email:"${req.currentUser!.email}"`,
     });
-  let customerId = "";
+  let customerId = '';
   if (customer.data.length === 0) {
     const createdCustomer: Stripe.Response<Stripe.Customer> =
       await stripe.customers.create({
@@ -42,24 +42,25 @@ const intent = async (req: Request, res: Response): Promise<void> => {
         : (5.5 / 100) * req.body.price;
     paymentIntent = await stripe.paymentIntents.create({
       amount: Math.floor((req.body.price + serviceFee) * 100),
-      currency: "usd",
+      currency: 'usd',
       customer: customerId,
       automatic_payment_methods: { enabled: true },
     });
   }
   res.status(StatusCodes.CREATED).json({
-    message: "enrolment intent created successfully.",
+    message: 'enrolment intent created successfully.',
     clientSecret: paymentIntent!.client_secret,
     paymentIntentId: paymentIntent!.id,
   });
 };
 
-const order = async (req: Request, res: Response): Promise<void> => {
+const enrolment = async (req: Request, res: Response): Promise<void> => {
   const { error } = await Promise.resolve(enrolmentSchema.validate(req.body));
+  console.log(req.body);
   if (error?.details) {
     throw new BadRequestError(
       error.details[0].message,
-      "Create order() method"
+      'Create enrolment() method'
     );
   }
   const serviceFee: number =
@@ -71,7 +72,7 @@ const order = async (req: Request, res: Response): Promise<void> => {
   const offer: IEnrolmentDocument = await createEnrolment(orderData);
   res
     .status(StatusCodes.CREATED)
-    .json({ message: "enrolment created successfully.", offer });
+    .json({ message: 'enrolment created successfully.', offer });
 };
 
-export { intent, order };
+export { intent, enrolment };

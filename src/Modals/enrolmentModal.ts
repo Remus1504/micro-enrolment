@@ -1,9 +1,9 @@
-import { IEnrolmentDocument } from "@remus1504/micrograde-shared";
-import { model, Model, Schema } from "mongoose";
+import { IEnrolmentDocument } from '@remus1504/micrograde-shared';
+import { model, Model, Schema } from 'mongoose';
 
 const enrolmentSchema: Schema = new Schema(
   {
-    Enrolment: {
+    offer: {
       courseTitle: { type: String, required: true },
       price: { type: Number, required: true },
       description: { type: String, required: true },
@@ -12,7 +12,7 @@ const enrolmentSchema: Schema = new Schema(
       newStartDate: { type: Date },
       accepted: { type: Boolean, required: true },
       cancelled: { type: Boolean, required: true },
-      reason: { type: String, default: "" },
+      reason: { type: String, default: '' },
     },
     courseId: { type: String, required: true },
     instructorId: { type: String, required: true, index: true },
@@ -28,13 +28,13 @@ const enrolmentSchema: Schema = new Schema(
     studentEmail: { type: String, required: true },
     studentImage: { type: String, required: true },
     status: { type: String, required: true },
-    orderId: { type: String, required: true, index: true },
+    enrolmentId: { type: String, required: true, index: true },
     quantity: { type: Number, required: true },
     price: { type: Number, required: true },
     serviceFee: { type: Number, default: 0 },
-    requirements: { type: String, default: "" },
+    requirements: { type: String, default: '' },
     approvedEnrolment: { type: Boolean, default: false },
-    enrolled: { type: Boolean, default: false },
+    accepted: { type: Boolean, default: false },
     cancelled: { type: Boolean, default: false },
     approvedAt: { type: Date },
     paymentIntent: { type: String },
@@ -48,10 +48,10 @@ const enrolmentSchema: Schema = new Schema(
       },
     ],
     requestCourseExtension: {
-      originalDate: { type: String, default: "" },
-      newDate: { type: String, default: "" },
+      originalDate: { type: String, default: '' },
+      newDate: { type: String, default: '' },
       days: { type: Number, default: 0 },
-      reason: { type: String, default: "" },
+      reason: { type: String, default: '' },
     },
     dateEnrolled: { type: Date, default: Date.now },
     events: {
@@ -65,12 +65,12 @@ const enrolmentSchema: Schema = new Schema(
     },
     studentReview: {
       rating: { type: Number, default: 0 },
-      review: { type: String, default: "" },
+      review: { type: String, default: '' },
       created: { type: Date },
     },
     InstructorReview: {
       rating: { type: Number, default: 0 },
-      review: { type: String, default: "" },
+      review: { type: String, default: '' },
       created: { type: Date },
     },
   },
@@ -80,8 +80,8 @@ const enrolmentSchema: Schema = new Schema(
 );
 
 const EnrolmentModel: Model<IEnrolmentDocument> = model<IEnrolmentDocument>(
-  "Enrolment",
+  'Enrolment',
   enrolmentSchema,
-  "Enrolment"
+  'Enrolment'
 );
 export { EnrolmentModel };

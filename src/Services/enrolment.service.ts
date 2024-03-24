@@ -1,7 +1,7 @@
-import { config } from "../configuration";
-import { EnrolmentModel } from "../Modals/enrolmentModal";
-import { publishDirectMessage } from "../Queues/enrolment.producer";
-import { enrolmentChannel } from "../server";
+import { config } from '../configuration';
+import { EnrolmentModel } from '../Modals/enrolmentModal';
+import { publishDirectMessage } from '../Queues/enrolment.producer';
+import { enrolmentChannel } from '../server';
 import {
   IDeliveredWork,
   IExtendedEnrolment,
@@ -9,14 +9,14 @@ import {
   IEnrolmentMessage,
   IReviewMessageDetails,
   lowerCase,
-} from "@remus1504/micrograde-shared";
-import { sendNotification } from "../Services/notification.service";
+} from '@remus1504/micrograde-shared';
+import { sendNotification } from '../Services/notification.service';
 
 export const getEnrolmentByEnrolmentId = async (
-  orderId: string
+  enrolmentId: string
 ): Promise<IEnrolmentDocument> => {
   const enrolment: IEnrolmentDocument[] = (await EnrolmentModel.aggregate([
-    { $match: { orderId } },
+    { $match: { enrolmentId } },
   ])) as IEnrolmentDocument[];
   return enrolment[0];
 };
@@ -46,20 +46,20 @@ export const createEnrolment = async (
   const messageDetails: IEnrolmentMessage = {
     instructorId: data.instructorId,
     onGoingTasks: 1,
-    type: "create-order",
+    type: 'create-order',
   };
   // update instructor info
   await publishDirectMessage(
     enrolmentChannel,
-    "micrograde-instructor-update",
-    "user-instructor",
+    'micrograde-instructor-update',
+    'user-instructor',
     JSON.stringify(messageDetails),
-    "Details sent to users service"
+    'Details sent to users service'
   );
   const emailMessageDetails: IEnrolmentMessage = {
-    orderId: data.orderId,
+    enrolmentId: data.enrolmentId,
     invoiceId: data.invoiceId,
-    orderDue: `${data.offer.newDeliveryDate}`,
+    orderDue: `${data.offer.newStartDate}`,
     amount: `${data.price}`,
     studentUsername: lowerCase(data.studentUsername),
     instructorUsername: lowerCase(data.instructorUsername),
@@ -68,35 +68,35 @@ export const createEnrolment = async (
     requirements: data.requirements,
     serviceFee: `${enrolment.serviceFee}`,
     total: `${enrolment.price + enrolment.serviceFee!}`,
-    enrolmentUrl: `${config.CLIENT_URL}/enrolments/${data.orderId}/activities`,
-    template: "orderPlaced",
+    enrolmentUrl: `${config.CLIENT_URL}/enrolments/${data.enrolmentId}/activities`,
+    template: 'orderPlaced',
   };
   // send email
   await publishDirectMessage(
     enrolmentChannel,
-    "micrograde-enrolment-notification",
-    "enrolment-email",
+    'micrograde-enrolment-notification',
+    'enrolment-email',
     JSON.stringify(emailMessageDetails),
-    "Enrolment email sent to notification service."
+    'Enrolment email sent to notification service.'
   );
   sendNotification(
     enrolment,
     data.instructorUsername,
-    "placed an enrolment for your course."
+    'placed an enrolment for your course.'
   );
   return enrolment;
 };
 
 export const cancelEnrolment = async (
-  orderId: string,
+  enrolmentId: string,
   data: IEnrolmentMessage
 ): Promise<IEnrolmentDocument> => {
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { orderId },
+    { enrolmentId },
     {
       $set: {
         cancelled: true,
-        status: "Cancelled",
+        status: 'Cancelled',
         approvedAt: new Date(),
       },
     },
@@ -105,44 +105,44 @@ export const cancelEnrolment = async (
   // update instructor info
   await publishDirectMessage(
     enrolmentChannel,
-    "micrograde-instructor-update",
-    "user-instructor",
+    'micrograde-instructor-update',
+    'user-instructor',
     JSON.stringify({
-      type: "cancel-enrolment",
+      type: 'cancel-enrolment',
       instructorId: data.instructorId,
     }),
-    "Cancelled enrolment details sent to users service."
+    'Cancelled enrolment details sent to users service.'
   );
   // update student info
   await publishDirectMessage(
     enrolmentChannel,
-    "micrograde-student-update",
-    "user-student",
+    'micrograde-student-update',
+    'user-student',
     JSON.stringify({
-      type: "cancel-enrolment",
+      type: 'cancel-enrolment',
       studentId: data.studentId,
       enrolledCourses: data.enrolledCourses,
     }),
-    "Cancelled enrolment details sent to users service."
+    'Cancelled enrolment details sent to users service.'
   );
   sendNotification(
     enrolment,
     enrolment.instructorUsername,
-    "cancelled your enrolment."
+    'cancelled your enrolment.'
   );
   return enrolment;
 };
 
 export const approveEnrolment = async (
-  orderId: string,
+  enrolmentId: string,
   data: IEnrolmentMessage
 ): Promise<IEnrolmentDocument> => {
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { orderId },
+    { enrolmentId },
     {
       $set: {
         approved: true,
-        status: "Completed",
+        status: 'Completed',
         approvedAt: new Date(),
       },
     },
@@ -153,50 +153,50 @@ export const approveEnrolment = async (
     studentId: data.studentId,
     onGoingTasks: data.onGoingTasks,
     completedTasks: data.completedTasks,
-    totalPoints: data.totalPoints, // this is the price the instructor earned for lastest enrolment delivered
+    totalEarnings: data.totalEarnings, // this is the price the instructor earned for lastest enrolment delivered
     recentDelivery: `${new Date()}`,
-    type: "approve-order",
+    type: 'approve-order',
   };
   // update instructor info
   await publishDirectMessage(
     enrolmentChannel,
-    "micrograde-instructor-update",
-    "user-instructor",
+    'micrograde-instructor-update',
+    'user-instructor',
     JSON.stringify(messageDetails),
-    "Approved enrolment details sent to users service."
+    'Approved enrolment details sent to users service.'
   );
   // update student info
   await publishDirectMessage(
     enrolmentChannel,
-    "micrograde-student-update",
-    "user-student",
+    'micrograde-student-update',
+    'user-student',
     JSON.stringify({
-      type: "purchased-courses",
+      type: 'purchased-courses',
       studentId: data.studentId,
       enrolledCourses: data.enrolledCourses,
     }),
-    "Approved enrolment details sent to users service."
+    'Approved enrolment details sent to users service.'
   );
   sendNotification(
     enrolment,
     enrolment.instructorUsername,
-    "approved your enrolment delivery."
+    'approved your enrolment delivery.'
   );
   return enrolment;
 };
 
 export const instructorDeliveredEnrolment = async (
-  orderId: string,
+  enrolmentId: string,
   delivered: boolean,
   deliveredWork: IDeliveredWork
 ): Promise<IEnrolmentDocument> => {
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { orderId },
+    { enrolmentId },
     {
       $set: {
         delivered,
-        status: "Enrolled",
-        ["events.orderDelivered"]: new Date(),
+        status: 'Enrolled',
+        ['events.orderDelivered']: new Date(),
       },
       $push: {
         deliveredWork,
@@ -206,44 +206,44 @@ export const instructorDeliveredEnrolment = async (
   ).exec()) as IEnrolmentDocument;
   if (enrolment) {
     const messageDetails: IEnrolmentMessage = {
-      orderId,
+      enrolmentId,
       studentUsername: lowerCase(enrolment.studentUsername),
       instructorUsername: lowerCase(enrolment.instructorUsername),
       title: enrolment.offer.courseTitle,
       description: enrolment.offer.description,
-      enrolmentUrl: `${config.CLIENT_URL}/enrolments/${orderId}/activities`,
-      template: "orderDelivered",
+      enrolmentUrl: `${config.CLIENT_URL}/enrolments/${enrolmentId}/activities`,
+      template: 'orderDelivered',
     };
     // send email
     await publishDirectMessage(
       enrolmentChannel,
-      "micrograde-enrolment-notification",
-      "enrolment-email",
+      'micrograde-enrolment-notification',
+      'enrolment-email',
       JSON.stringify(messageDetails),
-      "Enrolment sucessful message sent to notification service."
+      'Enrolment sucessful message sent to notification service.'
     );
     sendNotification(
       enrolment,
       enrolment.studentUsername,
-      "sucessful enrolment."
+      'sucessful enrolment.'
     );
   }
   return enrolment;
 };
 
 export const requestEnrolmentExtension = async (
-  orderId: string,
+  enrolmentId: string,
   data: IExtendedEnrolment
 ): Promise<IEnrolmentDocument> => {
   const { newDate, days, reason, originalDate } = data;
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { orderId },
+    { enrolmentId },
     {
       $set: {
-        ["requestExtension.originalDate"]: originalDate,
-        ["requestExtension.newDate"]: newDate,
-        ["requestExtension.days"]: days,
-        ["requestExtension.reason"]: reason,
+        ['requestExtension.originalDate']: originalDate,
+        ['requestExtension.newDate']: newDate,
+        ['requestExtension.days']: days,
+        ['requestExtension.reason']: reason,
       },
     },
     { new: true }
@@ -255,44 +255,44 @@ export const requestEnrolmentExtension = async (
       originalDate: enrolment.offer.oldStartDate,
       newDate: enrolment.offer.newStartDate,
       reason: enrolment.offer.reason,
-      enrolmentUrl: `${config.CLIENT_URL}/enrolments/${orderId}/activities`,
-      template: "orderExtension",
+      enrolmentUrl: `${config.CLIENT_URL}/enrolments/${enrolmentId}/activities`,
+      template: 'orderExtension',
     };
     // send email
     await publishDirectMessage(
       enrolmentChannel,
-      "micrograde-enrolment-notification",
-      "enrolment-email",
+      'micrograde-enrolment-notification',
+      'enrolment-email',
       JSON.stringify(messageDetails),
-      "Enrolment delivered message sent to notification service."
+      'Enrolment delivered message sent to notification service.'
     );
     sendNotification(
       enrolment,
       enrolment.studentUsername,
-      "requested for an enrolment delivery date extension."
+      'requested for an enrolment delivery date extension.'
     );
   }
   return enrolment;
 };
 
 export const approveEnrolmentDate = async (
-  orderId: string,
+  enrolmentId: string,
   data: IExtendedEnrolment
 ): Promise<IEnrolmentDocument> => {
-  const { newDate, days, reason, deliveryDateUpdate } = data;
+  const { newDate, days, reason, startDateUpdate } = data;
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { orderId },
+    { enrolmentId },
     {
       $set: {
-        ["offer.durationInDays"]: days,
-        ["offer.newStartDate"]: newDate,
-        ["offer.reason"]: reason,
-        ["events.startDateUpdate"]: new Date(`${deliveryDateUpdate}`),
+        ['offer.durationInDays']: days,
+        ['offer.newStartDate']: newDate,
+        ['offer.reason']: reason,
+        ['events.startDateUpdate']: new Date(`${startDateUpdate}`),
         requestExtension: {
-          originalDate: "",
-          newDate: "",
+          originalDate: '',
+          newDate: '',
           days: 0,
-          reason: "",
+          reason: '',
         },
       },
     },
@@ -300,44 +300,44 @@ export const approveEnrolmentDate = async (
   ).exec()) as IEnrolmentDocument;
   if (enrolment) {
     const messageDetails: IEnrolmentMessage = {
-      subject: "Congratulations: Your extension request was approved",
+      subject: 'Congratulations: Your extension request was approved',
       studentUsername: lowerCase(enrolment.studentUsername),
       instructorUsername: lowerCase(enrolment.instructorUsername),
-      header: "Request Accepted",
-      type: "accepted",
-      message: "You can continue working on the enrolment.",
-      enrolmentUrl: `${config.CLIENT_URL}/enrolments/${orderId}/activities`,
-      template: "orderExtensionApproval",
+      header: 'Request Accepted',
+      type: 'accepted',
+      message: 'You can continue working on the enrolment.',
+      enrolmentUrl: `${config.CLIENT_URL}/enrolments/${enrolmentId}/activities`,
+      template: 'orderExtensionApproval',
     };
     // send email
     await publishDirectMessage(
       enrolmentChannel,
-      "micrograde-enrolment-notification",
-      "enrolment-email",
+      'micrograde-enrolment-notification',
+      'enrolment-email',
       JSON.stringify(messageDetails),
-      "Enrolment request extension approval message sent to notification service."
+      'Enrolment request extension approval message sent to notification service.'
     );
     sendNotification(
       enrolment,
       enrolment.instructorUsername,
-      "approved your enrolment delivery date extension request."
+      'approved your enrolment start date extension request.'
     );
   }
   return enrolment;
 };
 
 export const rejectExtensionDate = async (
-  orderId: string
+  enrolmentId: string
 ): Promise<IEnrolmentDocument> => {
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { orderId },
+    { enrolmentId },
     {
       $set: {
         requestExtension: {
-          originalDate: "",
-          newDate: "",
+          originalDate: '',
+          newDate: '',
           days: 0,
-          reason: "",
+          reason: '',
         },
       },
     },
@@ -345,27 +345,27 @@ export const rejectExtensionDate = async (
   ).exec()) as IEnrolmentDocument;
   if (enrolment) {
     const messageDetails: IEnrolmentMessage = {
-      subject: "Sorry: Your extension request was rejected",
+      subject: 'Sorry: Your extension request was rejected',
       studentUsername: lowerCase(enrolment.studentUsername),
       instructorUsername: lowerCase(enrolment.instructorUsername),
-      header: "Request Rejected",
-      type: "rejected",
-      message: "You can contact the student for more information.",
-      enrolmentUrl: `${config.CLIENT_URL}/orders/${orderId}/activities`,
-      template: "orderExtensionApproval",
+      header: 'Request Rejected',
+      type: 'rejected',
+      message: 'You can contact the student for more information.',
+      enrolmentUrl: `${config.CLIENT_URL}/enrolments/${enrolmentId}/activities`,
+      template: 'orderExtensionApproval',
     };
     // send email
     await publishDirectMessage(
       enrolmentChannel,
-      "micrograde-enrolment-notification",
-      "enrolment-email",
+      'micrograde-enrolment-notification',
+      'enrolment-email',
       JSON.stringify(messageDetails),
-      "Enrolment request extension rejection message sent to notification service."
+      'Enrolment request extension rejection message sent to notification service.'
     );
     sendNotification(
       enrolment,
       enrolment.instructorUsername,
-      "rejected your enrolment delivery date extension request."
+      'rejected your enrolment delivery date extension request.'
     );
   }
   return enrolment;
@@ -375,17 +375,17 @@ export const updateEnrolmentReview = async (
   data: IReviewMessageDetails
 ): Promise<IEnrolmentDocument> => {
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { orderId: data.enrolledId },
+    { enrolmentId: data.enrolledId },
     {
       $set:
-        data.type === "student-review"
+        data.type === 'student-review'
           ? {
               studentReview: {
                 rating: data.rating,
                 review: data.review,
                 created: new Date(`${data.createdAt}`),
               },
-              ["events.studentReview"]: new Date(`${data.createdAt}`),
+              ['events.studentReview']: new Date(`${data.createdAt}`),
             }
           : {
               instructorReview: {
@@ -393,14 +393,14 @@ export const updateEnrolmentReview = async (
                 review: data.review,
                 created: new Date(`${data.createdAt}`),
               },
-              ["events.instructorReview"]: new Date(`${data.createdAt}`),
+              ['events.instructorReview']: new Date(`${data.createdAt}`),
             },
     },
     { new: true }
   ).exec()) as IEnrolmentDocument;
   sendNotification(
     enrolment,
-    data.type === "student-review"
+    data.type === 'student-review'
       ? enrolment.instructorUsername
       : enrolment.studentUsername,
     `left you a ${data.rating} star review`

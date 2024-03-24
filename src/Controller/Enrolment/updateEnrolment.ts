@@ -1,9 +1,9 @@
-import crypto from "crypto";
+import crypto from 'crypto';
 
-import Stripe from "stripe";
-import { Request, Response } from "express";
-import { config } from "../../configuration";
-import { StatusCodes } from "http-status-codes";
+import Stripe from 'stripe';
+import { Request, Response } from 'express';
+import { config } from '../../configuration';
+import { StatusCodes } from 'http-status-codes';
 import {
   approveEnrolmentDate,
   approveEnrolment,
@@ -11,15 +11,15 @@ import {
   rejectExtensionDate,
   requestEnrolmentExtension,
   instructorDeliveredEnrolment,
-} from "../../Services/enrolment.service";
-import { enrolmentUpdateSchema } from "../../Schema/enrolment";
+} from '../../Services/enrolment.service';
+import { enrolmentUpdateSchema } from '../../Schema/enrolment';
 import {
   BadRequestError,
   IDeliveredWork,
   IEnrolmentDocument,
   uploads,
-} from "@remus1504/micrograde-shared";
-import { UploadApiResponse } from "cloudinary";
+} from '@remus1504/micrograde-shared';
+import { UploadApiResponse } from 'cloudinary';
 
 const stripe: Stripe = new Stripe(config.STRIPE_API_KEY!, {
   typescript: true,
@@ -29,11 +29,11 @@ const cancel = async (req: Request, res: Response): Promise<void> => {
   await stripe.refunds.create({
     payment_intent: `${req.body.paymentIntent}`,
   });
-  const { enrolmentOrderId } = req.params;
-  await cancelEnrolment(enrolmentOrderId, req.body.orderData);
+  const { enrolmentId } = req.params;
+  await cancelEnrolment(enrolmentId, req.body.orderData);
   res
     .status(StatusCodes.OK)
-    .json({ message: "Enrolment cancelled successfully." });
+    .json({ message: 'Enrolment cancelled successfully.' });
 };
 
 const requestExtension = async (req: Request, res: Response): Promise<void> => {
@@ -43,67 +43,68 @@ const requestExtension = async (req: Request, res: Response): Promise<void> => {
   if (error?.details) {
     throw new BadRequestError(
       error.details[0].message,
-      "Update requestExtension() method"
+      'Update requestExtension() method'
     );
   }
-  const { enrolmentOrderId } = req.params;
-  const order: IEnrolmentDocument = await requestEnrolmentExtension(
-    enrolmentOrderId,
+  const { enrolmentId } = req.params;
+  console.log(enrolmentId);
+  const enrolment: IEnrolmentDocument = await requestEnrolmentExtension(
+    enrolmentId,
     req.body
   );
-  res.status(StatusCodes.OK).json({ message: "Enrolment request", order });
+  res.status(StatusCodes.OK).json({ message: 'Enrolment request', enrolment });
 };
 
-const deliveryDate = async (req: Request, res: Response): Promise<void> => {
+const startDate = async (req: Request, res: Response): Promise<void> => {
   const { error } = await Promise.resolve(
     enrolmentUpdateSchema.validate(req.body)
   );
   if (error?.details) {
     throw new BadRequestError(
       error.details[0].message,
-      "Update deliveryDate() method"
+      'Update startDate() method'
     );
   }
-  const { enrolmentOrderId, type } = req.params;
-  const order: IEnrolmentDocument =
-    type === "approve"
-      ? await approveEnrolmentDate(enrolmentOrderId, req.body)
-      : await rejectExtensionDate(enrolmentOrderId);
+  const { enrolmentId, type } = req.params;
+  const enrolment: IEnrolmentDocument =
+    type === 'approve'
+      ? await approveEnrolmentDate(enrolmentId, req.body)
+      : await rejectExtensionDate(enrolmentId);
   res
     .status(StatusCodes.OK)
-    .json({ message: "Enrolment date extension", order });
+    .json({ message: 'Enrolment date extension', enrolment });
 };
 
 const studentApproveEnrolment = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { enrolmentOrderId } = req.params;
-  const order: IEnrolmentDocument = await approveEnrolment(
-    enrolmentOrderId,
+  const { enrolmentId } = req.params;
+  const enrolment: IEnrolmentDocument = await approveEnrolment(
+    enrolmentId,
     req.body
   );
   res
     .status(StatusCodes.OK)
-    .json({ message: "Enrolment approved successfully.", order });
+    .json({ message: 'Enrolment approved successfully.', enrolment });
 };
 
 const deliverEnrolment = async (req: Request, res: Response): Promise<void> => {
-  const { enrolmentOrderId } = req.params;
+  const { enrolmentId } = req.params;
   let file: string = req.body.file;
   const randomBytes: Buffer = await Promise.resolve(crypto.randomBytes(20));
-  const randomCharacters: string = randomBytes.toString("hex");
+  const randomCharacters: string = randomBytes.toString('hex');
   let result: UploadApiResponse;
   if (file) {
     result = (
-      req.body.fileType === "zip"
+      req.body.fileType === 'zip'
         ? await uploads(file, `${randomCharacters}.zip`)
         : await uploads(file)
     ) as UploadApiResponse;
     if (!result.public_id) {
       throw new BadRequestError(
-        "File upload error. Try again",
-        "Update deliverEnrolment() method"
+        'File upload error. Try again',
+        'Update deliverEnrolment() method'
       );
     }
     file = result?.secure_url;
@@ -115,20 +116,20 @@ const deliverEnrolment = async (req: Request, res: Response): Promise<void> => {
     fileName: req.body.fileName,
     fileSize: req.body.fileSize,
   };
-  const order: IEnrolmentDocument = await instructorDeliveredEnrolment(
-    enrolmentOrderId,
+  const enrolment: IEnrolmentDocument = await instructorDeliveredEnrolment(
+    enrolmentId,
     true,
     deliveredWork
   );
   res
     .status(StatusCodes.OK)
-    .json({ message: "Enrolment delivered successfully.", order });
+    .json({ message: 'Enrolment delivered successfully.', enrolment });
 };
 
 export {
   cancel,
   requestExtension,
-  deliveryDate,
+  startDate,
   studentApproveEnrolment,
   deliverEnrolment,
 };

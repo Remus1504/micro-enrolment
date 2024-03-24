@@ -1,4 +1,4 @@
-import Joi, { ObjectSchema } from "joi";
+import Joi, { ObjectSchema } from 'joi';
 
 const enrolmentSchema: ObjectSchema = Joi.object().keys({
   offer: Joi.object({
@@ -30,7 +30,7 @@ const enrolmentSchema: ObjectSchema = Joi.object().keys({
   quantity: Joi.number().required(),
   price: Joi.number().required(),
   serviceFee: Joi.number().optional(),
-  requirements: Joi.string().optional().allow(null, ""),
+  requirements: Joi.string().optional().allow(null, ''),
   paymentIntent: Joi.string().required(),
   requestExtension: Joi.object({
     originalDate: Joi.string().required(),
@@ -48,11 +48,11 @@ const enrolmentSchema: ObjectSchema = Joi.object().keys({
       })
     )
     .optional(),
-  dateOrdered: Joi.string().optional(),
+  dateEnrolled: Joi.string().optional(),
   events: Joi.object({
     placeOrder: Joi.string(),
     requirements: Joi.string(),
-    orderStarted: Joi.string(),
+    enrolmentStarted: Joi.string(),
     enrolmentdateUpdate: Joi.string().optional(),
     enrolmentSucessful: Joi.string().optional(),
     studentReview: Joi.string().optional(),
