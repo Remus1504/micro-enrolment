@@ -73,7 +73,7 @@ const enrolmentUpdateSchema: ObjectSchema = Joi.object().keys({
   newDate: Joi.string().required(),
   days: Joi.number().required(),
   reason: Joi.string().required(),
-  enrolmentDateUpdate: Joi.string().optional(),
+  startDateUpdate: Joi.string().optional(),
 });
 
 export { enrolmentSchema, enrolmentUpdateSchema };

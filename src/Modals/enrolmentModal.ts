@@ -33,8 +33,8 @@ const enrolmentSchema: Schema = new Schema(
     price: { type: Number, required: true },
     serviceFee: { type: Number, default: 0 },
     requirements: { type: String, default: '' },
-    approvedEnrolment: { type: Boolean, default: false },
-    accepted: { type: Boolean, default: false },
+    approved: { type: Boolean, default: false },
+    delivered: { type: Boolean, default: false },
     cancelled: { type: Boolean, default: false },
     approvedAt: { type: Date },
     paymentIntent: { type: String },
@@ -47,7 +47,7 @@ const enrolmentSchema: Schema = new Schema(
         fileName: { type: String },
       },
     ],
-    requestCourseExtension: {
+    requestExtension: {
       originalDate: { type: String, default: '' },
       newDate: { type: String, default: '' },
       days: { type: Number, default: 0 },
@@ -55,11 +55,11 @@ const enrolmentSchema: Schema = new Schema(
     },
     dateEnrolled: { type: Date, default: Date.now },
     events: {
-      placeEnrolment: { type: Date },
+      placeOrder: { type: Date },
       requirements: { type: Date },
       enrolmentStarted: { type: Date },
       startDateUpdate: { type: Date },
-      enrolmentSuccessful: { type: Date },
+      enrolmentDelivered: { type: Date },
       studentReview: { type: Date },
       instructorReview: { type: Date },
     },

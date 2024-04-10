@@ -10,4 +10,4 @@ const appRoutes = (app: Application): void => {
   app.use(BASE_PATH, verifyGatewayRequest, enrolmentRoutes());
 };
 
-export { appRoutes };
+export { appRoutes, enrolmentRoutes, healthRoutes };

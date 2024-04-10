@@ -84,6 +84,7 @@ const studentApproveEnrolment = async (
     enrolmentId,
     req.body
   );
+  console.log(req.body);
   res
     .status(StatusCodes.OK)
     .json({ message: 'Enrolment approved successfully.', enrolment });

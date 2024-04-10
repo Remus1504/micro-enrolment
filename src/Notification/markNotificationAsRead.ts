@@ -1,7 +1,7 @@
-import { markNotificationAsRead } from "../Services/notification.service";
-import { IEnrolmentNotifcation } from "@remus1504/micrograde-shared";
-import { Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
+import { markNotificationAsRead } from '../Services/notification.service';
+import { IEnrolmentNotifcation } from '@remus1504/micrograde-shared';
+import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 const markSingleNotificationAsRead = async (
   req: Request,
@@ -12,7 +12,7 @@ const markSingleNotificationAsRead = async (
     await markNotificationAsRead(notificationId);
   res
     .status(StatusCodes.OK)
-    .json({ message: "Notification updated successfully.", notification });
+    .json({ message: 'Notification updated successfully.', notification });
 };
 
 export { markSingleNotificationAsRead };

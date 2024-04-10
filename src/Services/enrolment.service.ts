@@ -46,7 +46,7 @@ export const createEnrolment = async (
   const messageDetails: IEnrolmentMessage = {
     instructorId: data.instructorId,
     onGoingTasks: 1,
-    type: 'create-order',
+    type: 'create-enrolment',
   };
   // update instructor info
   await publishDirectMessage(
@@ -59,7 +59,7 @@ export const createEnrolment = async (
   const emailMessageDetails: IEnrolmentMessage = {
     enrolmentId: data.enrolmentId,
     invoiceId: data.invoiceId,
-    orderDue: `${data.offer.newStartDate}`,
+    enrolmentDue: `${data.offer.newStartDate}`,
     amount: `${data.price}`,
     studentUsername: lowerCase(data.studentUsername),
     instructorUsername: lowerCase(data.instructorUsername),
@@ -121,7 +121,7 @@ export const cancelEnrolment = async (
     JSON.stringify({
       type: 'cancel-enrolment',
       studentId: data.studentId,
-      enrolledCourses: data.enrolledCourses,
+      purchasedCourses: data.purchasedCourses,
     }),
     'Cancelled enrolment details sent to users service.'
   );
@@ -155,7 +155,7 @@ export const approveEnrolment = async (
     completedTasks: data.completedTasks,
     totalEarnings: data.totalEarnings, // this is the price the instructor earned for lastest enrolment delivered
     recentDelivery: `${new Date()}`,
-    type: 'approve-order',
+    type: 'approve-enrolment',
   };
   // update instructor info
   await publishDirectMessage(
@@ -173,7 +173,7 @@ export const approveEnrolment = async (
     JSON.stringify({
       type: 'purchased-courses',
       studentId: data.studentId,
-      enrolledCourses: data.enrolledCourses,
+      purchasedCourses: data.purchasedCourses,
     }),
     'Approved enrolment details sent to users service.'
   );
@@ -195,8 +195,8 @@ export const instructorDeliveredEnrolment = async (
     {
       $set: {
         delivered,
-        status: 'Enrolled',
-        ['events.orderDelivered']: new Date(),
+        status: 'Delivered',
+        ['events.enrolmentDelivered']: new Date(),
       },
       $push: {
         deliveredWork,
@@ -375,7 +375,7 @@ export const updateEnrolmentReview = async (
   data: IReviewMessageDetails
 ): Promise<IEnrolmentDocument> => {
   const enrolment: IEnrolmentDocument = (await EnrolmentModel.findOneAndUpdate(
-    { enrolmentId: data.enrolledId },
+    { enrolmentId: data.enrolmentId },
     {
       $set:
         data.type === 'student-review'
